@@ -1,103 +1,174 @@
-import Image from "next/image";
+"use client";
+import  {useSocket}  from "@/hooks/useSocket";
+import { useEffect, useState, useCallback } from "react";
 
-export default function Home() {
+export default function Page() {
+  const { socket, isConnected } = useSocket();
+  const [alerts, setAlerts] = useState([]);
+  const [connectionStatus, setConnectionStatus] = useState("Connecting...");
+
+  // Memoize the alert handler to prevent unnecessary re-renders
+  const handleAlert = useCallback((alert) => {
+    console.log("Alert received:", alert);
+    setAlerts((prev) => [...prev, {
+      id: Date.now() + Math.random(), // Unique ID for each alert
+      message: alert,
+      timestamp: new Date().toLocaleTimeString()
+    }]);
+  }, []);
+
+  // Handle connection status updates
+  useEffect(() => {
+    if (isConnected) {
+      setConnectionStatus("Connected");
+    } else {
+      setConnectionStatus("Disconnected");
+    }
+  }, [isConnected]);
+
+  useEffect(() => {
+    if (!socket) {
+      setConnectionStatus("Socket not initialized");
+      return;
+    }
+
+    console.log("Setting up alert listener");
+
+    // Listen for alerts
+    // socket.on("alert", handleAlert);
+
+    socket.emit("join-room", "general");
+    socket.on("alert", handleAlert);
+
+
+
+    // Optional: Listen for other events
+    socket.on("notification", (data) => {
+      console.log("Notification received:", data);
+    });
+
+    // Cleanup function - only remove the specific listeners
+    return () => {
+      console.log("Cleaning up alert listener");
+      socket.off("alert", handleAlert);
+      socket.off("notification");
+    };
+  }, [socket, handleAlert]);
+
+  // Test function to trigger an alert from the frontend
+  const triggerTestAlert = () => {
+    if (socket) {
+      socket.emit("test-alert", { 
+        message: "Test alert from frontend",
+        timestamp: new Date().toISOString()
+      });
+    }
+  };
+
+  // Clear all alerts
+  const clearAlerts = () => {
+    setAlerts([]);
+  };
+
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Header */}
+      <div className="text-center">
+        <h1 className="text-2xl font-bold">ALERTS DEMO!</h1>
+        <div className="mt-2 flex items-center justify-center gap-2">
+          <span className="text-sm">Status:</span>
+          <span className={`px-2 py-1 rounded text-sm ${
+            isConnected 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-red-100 text-red-800'
+          }`}>
+            {connectionStatus}
+          </span>
+          {socket && (
+            <span className="text-xs text-gray-500">
+              ID: {socket.id || 'Not connected'}
+            </span>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      {/* Main Content */}
+      <div className="w-full max-w-2xl">
+        {/* Controls */}
+        <div className="mb-4 flex gap-2 justify-center">
+          <button
+            onClick={triggerTestAlert}
+            disabled={!isConnected}
+            className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300 disabled:cursor-not-allowed"
+          >
+            Send Test Alert
+          </button>
+          <button
+            onClick={clearAlerts}
+            className="px-4 py-2 bg-red-500 text-white rounded"
+          >
+            Clear Alerts
+          </button>
+        </div>
+
+        {/* Alerts Container */}
+        <div className="flex flex-col gap-2 max-h-96 overflow-y-auto">
+          {alerts.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">
+              No alerts yet. {isConnected ? "Waiting for alerts..." : "Connect to start receiving alerts."}
+            </div>
+          ) : (
+            alerts.map((alert) => (
+              <div 
+                key={alert.id} 
+                className="bg-gray-100 p-3 rounded-md text-black border-l-4 border-blue-500 animate-fadeIn"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="font-medium">
+                      {typeof alert.message === 'string' 
+                        ? alert.message 
+                        : JSON.stringify(alert.message)
+                      }
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      {alert.timestamp}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setAlerts(prev => prev.filter(a => a.id !== alert.id))}
+                    className="text-gray-400 hover:text-gray-600 text-sm ml-2"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+        
+        {/* Alert Count */}
+        {alerts.length > 0 && (
+          <div className="text-center text-sm text-gray-600 mt-4">
+            Total alerts: {alerts.length}
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="text-xs text-gray-500 text-center">
+        Socket.io Integration Demo
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }
