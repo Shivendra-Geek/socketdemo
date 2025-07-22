@@ -7,7 +7,7 @@ let socket = null;
 const initializeSocket = () => {
   if (!socket) {
     // Use http:// instead of ws:// for socket.io 
-    socket = io("https://staging.agere.games", {
+    socket = io("http://localhost:1337/", {
       transports: ["websocket", "polling"],
       autoConnect: true,
       reconnection: true,

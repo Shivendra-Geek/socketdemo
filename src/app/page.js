@@ -1,6 +1,8 @@
 "use client";
-import  {useSocket}  from "@/hooks/useSocket";
-import { useEffect, useState, useCallback } from "react";
+
+import JoinRoom from "@/components/JoinRoom";
+import { useSocket } from "@/hooks/useSocket";
+import { useCallback, useEffect, useState } from "react";
 
 export default function Page() {
   const { socket, isConnected } = useSocket();
@@ -37,7 +39,7 @@ export default function Page() {
     // Listen for alerts
     // socket.on("alert", handleAlert);
 
-    socket.emit("join-room", "general");
+    // socket.emit("join-room", "GeekSuperAdmin_1751523082582_super-administrator");
     socket.on("alert", handleAlert);
 
 
@@ -71,7 +73,9 @@ export default function Page() {
   };
 
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
+    <div className="flex flex-row grid-rows-1 min-h-screen">
+     <JoinRoom/>
+     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-2xl font-bold">ALERTS DEMO!</h1>
@@ -169,6 +173,7 @@ export default function Page() {
           animation: fadeIn 0.3s ease-out;
         }
       `}</style>
+     </div>
     </div>
   );
 }
