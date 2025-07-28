@@ -1,5 +1,4 @@
 "use client";
-
 import JoinRoom from "@/components/JoinRoom";
 import { useSocket } from "@/hooks/useSocket";
 import { useCallback, useEffect, useState } from "react";
@@ -40,7 +39,7 @@ export default function Page() {
     // socket.on("alert", handleAlert);
 
     // socket.emit("join-room", "GeekSuperAdmin_1751523082582_super-administrator");
-    socket.on("alert", handleAlert);
+    // socket.on("alert", handleAlert);
 
 
 
@@ -51,9 +50,7 @@ export default function Page() {
 
     // Cleanup function - only remove the specific listeners
     return () => {
-      console.log("Cleaning up alert listener");
-      socket.off("alert", handleAlert);
-      socket.off("notification");
+       socket.off("player-connect");
     };
   }, [socket, handleAlert]);
 

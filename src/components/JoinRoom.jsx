@@ -28,7 +28,12 @@ export default function JoinRoom() {
             type="submit"
             onClick={(e)=>{
               e.preventDefault();
-              socket.emit("join-room", roomName);
+              // socket.emit("join-room", roomName);
+              socket.emit("player-connect",{
+                shopId:"shop1",
+                playerId:"player1",
+                username:"user1",
+              });
             }}
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
           >
