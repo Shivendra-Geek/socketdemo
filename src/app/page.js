@@ -2,11 +2,13 @@
 import JoinRoom from "@/components/JoinRoom";
 import { useSocket } from "@/hooks/useSocket";
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function Page() {
   const { socket, isConnected } = useSocket();
   const [alerts, setAlerts] = useState([]);
   const [connectionStatus, setConnectionStatus] = useState("Connecting...");
+  const searchParams = useSearchParams();
 
   // Memoize the alert handler to prevent unnecessary re-renders
   const handleAlert = useCallback((alert) => {
@@ -40,19 +42,22 @@ export default function Page() {
 
     // socket.emit("join-room", "GeekSuperAdmin_1751523082582_super-administrator");
     // socket.on("alert", handleAlert);
+     
 
+    console.log("role ::::",searchParams.get("role"));  
 
 
     // Optional: Listen for other events
-    socket.on("notification", (data) => {
+    socket.on(searchParams.get("role"), (data) => {
       console.log("Notification received:", data);
     });
 
     // Cleanup function - only remove the specific listeners
     return () => {
-       socket.off("player-connect");
+       socket.off("presence:connect");
+      //  socket.off(searchParams.get("role"));
     };
-  }, [socket, handleAlert]);
+  }, [socket, handleAlert,searchParams]);
 
   // Test function to trigger an alert from the frontend
   const triggerTestAlert = () => {

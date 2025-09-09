@@ -1,6 +1,7 @@
 "use client"
 import { useSocket } from "@/hooks/useSocket";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 
 
@@ -10,6 +11,7 @@ import { useState } from "react";
 export default function JoinRoom() {
    
   const socket = useSocket();
+  const router = useRouter();
 
   const [roomName, setRoomName] = useState(null);
 
@@ -29,11 +31,8 @@ export default function JoinRoom() {
             onClick={(e)=>{
               e.preventDefault();
               // socket.emit("join-room", roomName);
-              socket.emit("player-connect",{
-                shopId:"shop1",
-                playerId:"player1",
-                username:"user1",
-              });
+              router.push(`${window.location.pathname}?role=${roomName.split("-")[0]}`);
+              socket.emit("presence:connect",{userId:roomName.split("-")[1], parentId:null, username:roomName.split("-")[2], role:roomName.split("-")[0]});
             }}
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
           >

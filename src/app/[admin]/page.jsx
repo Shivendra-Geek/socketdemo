@@ -12,8 +12,15 @@ function Page() {
 
   useEffect(() => {
     if(!socket) return;
+
+    socket.emit("clear-redis");
     
-    socket.emit("shop-connect", admin);
+    socket.emit("presence:connect", {
+        userId: admin.split("-")[1],
+        parentId: null,
+        username: admin.split("-")[2],
+        role: admin.split("-")[0]
+    });
 
     const handleOnlineUsers = (players) => {
         console.log("Online players:", players);
@@ -33,9 +40,9 @@ function Page() {
     <div>
         <h1>Admin Room: {admin}</h1>
         <ul className='flex flex-col gap-2 text-center text-2xl' >
-            { onlinePlayers?.map((player, index) => (
-                <li key={index}>{player}</li>
-            ))}
+            {
+              JSON.stringify(onlinePlayers)
+            }
         </ul>
     </div>
   )
